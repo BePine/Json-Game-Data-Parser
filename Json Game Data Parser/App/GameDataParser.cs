@@ -1,7 +1,10 @@
-﻿namespace Json_Game_Data_Parser.App
+﻿using System.Text.Json;
+namespace Json_Game_Data_Parser.App
 {
+
     public class GameDataParser
     {
+
         public IUserInteraction _userInteraction { get; }
         public GameDataParser(IUserInteraction userInteraction)
         {
@@ -16,20 +19,32 @@
 
         }
     }
+    public interface IUserInteraction
+    {
+        public string ReadInput();
+        public void ShowInput();
+    }
 
     public class UserInteraction : IUserInteraction
     {
-        public IValidationService _validationService { get; }
-        public UserInteraction(IValidationService validationService)
+        public IFileInteraction _fileInteraction { get; }
+        public UserInteraction(IFileInteraction fileInteraction)
         {
-            _validationService = validationService;
+            _fileInteraction = fileInteraction;
         }
         public string ReadInput()
         {
             var usersInput = Console.ReadLine();
 
-            _validationService.Validate(usersInput);
-
+            bool isValid = _fileInteraction.Validate(usersInput);
+            if (isValid)
+            {
+                _fileInteraction.Read(usersInput);
+            }
+            else if(usersInput is null)
+            {
+                
+            }
             return usersInput;
         }
         public void ShowInput()
@@ -37,29 +52,31 @@
 
         }
     }
-    public interface IValidationService
+    public interface IFileInteraction
     {
-        public void Validate(string input);
+        public bool Validate(string input);
+        public void Read(string usersInput);
     }
 
-    public class ValidationService : IValidationService
+    public class FileInteraction : IFileInteraction
     {
-        public void Validate(string input)
+        public bool Validate(string input)
         {
-            if (File.Exists(input))
+            if (input is not null)
             {
-                
+                if (File.Exists(input))
+                {
+                    return true;
+                }
             }
-            
+            return false;
+
+        }
+        public void Read(string usersInput)
+        {
             
         }
     }
 
     
-
-    public interface IUserInteraction
-    {
-        public string ReadInput();
-        public void ShowInput();
-    }
 }
